@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -10,9 +11,18 @@ using Mono.Cecil;
 
 namespace Pdb.Rewriter
 {
+	/// <summary>
+	/// Entry point of the pdb rewriter assembly.
+	/// </summary>
 	public static class Rewrite
 	{
-		public static void Module(ModuleDefinition module, IDictionary<string, string> fileMapping)
+		/// <summary>
+		/// Rewrite the pdb attached to the module, and remaps the source files
+		/// referenced in the pdb
+		/// </summary>
+		/// <param name="module">The module that the pdb is attached to.</param>
+		/// <param name="fileMapping">The mapping between the source files.</param>
+		public static void MapSymbols(ModuleDefinition module, IDictionary<string, string> fileMapping)
 		{
 			if (module == null)
 				throw new ArgumentNullException("module");
@@ -54,7 +64,7 @@ namespace Pdb.Rewriter
 	{
 		public static string GetPdbFileName(this ModuleDefinition module)
 		{
-			return Path.GetFullPath(Path.ChangeExtension(module.FullyQualifiedName, ".dll"));
+			return Path.GetFullPath(Path.ChangeExtension(module.FullyQualifiedName, ".pdb"));
 		}
 	}
 
@@ -83,16 +93,23 @@ namespace Pdb.Rewriter
 		{
 			pdb.OpenMethod((int) function.token);
 
-			WriteScopes(function.scopes, function);
 			WriteDocuments(function);
-			WriteConstants(function);
+			WriteScopes(function.scopes, function);
+			WriteConstants(function.constants);
+
+			// TODO
+			// function.iteratorClass
+			// function.iteratorScopes
+			// function.namespaceScopes
+			// function.usedNamespaces
+			// function.usingCounts
 
 			pdb.CloseMethod();
 		}
 
-		private void WriteConstants(PdbFunction function)
+		private void WriteConstants(IEnumerable<PdbConstant> constants)
 		{
-			foreach (var constant in function.constants)
+			foreach (var constant in constants)
 				WriteConstant(constant);
 		}
 
@@ -112,6 +129,7 @@ namespace Pdb.Rewriter
 			pdb.OpenScope((int) scope.offset);
 
 			WriteSlots(scope, function);
+			WriteConstants(scope.constants);
 			WriteScopes(scope.scopes, function);
 
 			pdb.CloseScope((int) (scope.offset + scope.length));
@@ -125,7 +143,8 @@ namespace Pdb.Rewriter
 
 		private void WriteSlot(uint slotToken, PdbSlot slot, PdbScope scope)
 		{
-			pdb.DefineLocalVariable2(slot.name, slot.flags, (int) slotToken, (int) slot.slot, 0, 0, 0, (int) scope.offset, (int) (scope.offset + scope.length));
+			// it doesn't seem like slot.flags is persisted.
+			pdb.DefineLocalVariable2(slot.name, slot.flags, (int) slotToken, (int) SymAddressKind.ILOffset, (int) slot.slot, 0, 0, (int) scope.offset, (int) (scope.offset + scope.length));
 		}
 
 		private void WriteDocuments(PdbFunction function)
