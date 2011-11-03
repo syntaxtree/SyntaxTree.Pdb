@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="SyntaxTree.Pdb.Test\CecilMetadataProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SyntaxTree.Pdb.Test\MappingTest.cs" />
     <Compile Include="SyntaxTree.Pdb.Test\PdbTest.cs" />
     <Compile Include="SyntaxTree.Pdb.Test\PdbTestBase.cs" />
   </ItemGroup>

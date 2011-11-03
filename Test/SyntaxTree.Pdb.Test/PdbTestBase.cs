@@ -39,6 +39,7 @@ namespace SyntaxTree.Pdb.Test
 	{
 		private string tempPath;
 		protected ModuleDefinition module;
+		protected string pdbFileName;
 
 		internal static void AssertFunction(PdbFunction originalFunction, PdbFunction function)
 		{
@@ -151,10 +152,8 @@ namespace SyntaxTree.Pdb.Test
 			return Path.GetFullPath(Path.ChangeExtension(module.FullyQualifiedName, ".pdb"));
 		}
 
-		internal void RunTest(string name, out PdbFunction original, out PdbFunction rewritten, Dictionary<string, string> mapping = null)
+		internal void RunTest(string name, out PdbFunction original, out PdbFunction rewritten)
 		{
-			var pdbFileName = PdbFileNameOf(module);
-
 			PdbFunction[] originalFunctions;
 			using (var file = File.OpenRead(pdbFileName))
 				originalFunctions = PdbFile.LoadFunctions(file, readAllStrings: true);
@@ -191,6 +190,7 @@ namespace SyntaxTree.Pdb.Test
 			File.Copy(Path.ChangeExtension(moduleFile, ".pdb"), Path.Combine(tempPath, Path.GetFileNameWithoutExtension(moduleFile) + ".pdb"));
 
 			module = ModuleDefinition.ReadModule(tempModule);
+			pdbFileName = PdbFileNameOf(module);
 		}
 
 		[TearDown]
