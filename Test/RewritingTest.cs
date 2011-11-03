@@ -1,4 +1,5 @@
-﻿using Microsoft.Cci.Pdb;
+﻿using System.Collections.Generic;
+using Microsoft.Cci.Pdb;
 using NUnit.Framework;
 
 namespace Pdb.Rewriter.Test
@@ -21,6 +22,25 @@ namespace Pdb.Rewriter.Test
 		{
 			PdbFunction original, rewritten;
 			RunTest("Answer", out original, out rewritten);
+			AssertFunction(original, rewritten);
+		}
+
+		public IEnumerable<int> Evens()
+		{
+			int i = 0;
+
+			while (true)
+			{
+				yield return i;
+				i += 2;
+			}
+		}
+
+		[Test]
+		public void Iterator()
+		{
+			PdbFunction original, rewritten;
+			RunTest("Evens", out original, out rewritten);
 			AssertFunction(original, rewritten);
 		}
 	}

@@ -15,18 +15,20 @@ namespace Pdb.Rewriter.Test
 
 		internal static void AssertFunction(PdbFunction originalFunction, PdbFunction function)
 		{
+			Assert.AreEqual(originalFunction.token, function.token);
 			AssertLines(originalFunction.lines, function.lines);
 			AssertScopes(originalFunction.scopes, function.scopes);
 			AssertConstants(originalFunction.constants, function.constants);
 			Assert.AreEqual(originalFunction.slotToken, function.slotToken);
 			AssertSlots(originalFunction.slots, function.slots);
+			Assert.AreEqual(originalFunction.iteratorClass, function.iteratorClass);
 		}
 
 		private static void AssertLines(PdbLines[] originalLines, PdbLines[] lines)
 		{
 			AssertArrays(originalLines, lines);
 
-			for (int i = 0; i < originalLines.Length; i++)
+			for (int i = 0; i < (originalLines ?? new PdbLines[0]).Length; i++)
 			{
 				AssertFiles(originalLines[i].file, lines[i].file);
 				AssertLines(originalLines[i].lines, lines[i].lines);
@@ -95,9 +97,13 @@ namespace Pdb.Rewriter.Test
 
 		private static void AssertArrays(Array original, Array array)
 		{
-			Assert.IsNotNull(original);
-			Assert.IsNotNull(array);
+			if (original == null)
+			{
+				Assert.IsNull(array);
+				return;
+			}
 
+			Assert.IsNotNull(array);
 			Assert.AreEqual(original.Length, array.Length);
 		}
 
@@ -107,7 +113,7 @@ namespace Pdb.Rewriter.Test
 			using (var file = File.OpenRead(Extensions.GetPdbFileName(module)))
 				originalFunctions = PdbFile.LoadFunctions(file, readAllStrings: true);
 
-			var method = Enumerable.Single<MethodDefinition>(module.GetType(typeof (RewritingTest).FullName).Methods, m => m.Name == name);
+			var method = module.GetType(typeof (RewritingTest).FullName).Methods.Single(m => m.Name == name);
 			original = originalFunctions.Single(f => f.token == method.MetadataToken.ToUInt32());
 
 			Rewrite.MapSymbols(module, mapping ?? new Dictionary<string, string>());
