@@ -98,6 +98,7 @@ namespace Pdb.Rewriter
 			WriteConstants(function.constants);
 
 			WriteIteratorClass(function);
+			WriteIteratorScopes(function);
 
 			// TODO
 			// function.iteratorScopes
@@ -106,6 +107,34 @@ namespace Pdb.Rewriter
 			// function.usingCounts
 
 			pdb.CloseMethod();
+		}
+
+		private void WriteIteratorScopes(PdbFunction function)
+		{
+			if (function.iteratorScopes == null)
+				return;
+
+			var buffer = new ByteBuffer();
+			buffer.WriteByte(4);
+			buffer.WriteByte(1);
+			buffer.Align(4);
+
+			buffer.WriteByte(4);
+			buffer.WriteByte(3);
+			buffer.Align(4);
+
+			var scopes = function.iteratorScopes;
+
+			buffer.WriteInt32(scopes.Count * 8 + 12);
+			buffer.WriteInt32(scopes.Count);
+
+			foreach (var scope in scopes)
+			{
+				buffer.WriteInt32((int) scope.Offset);
+				buffer.WriteInt32((int) (scope.Offset + scope.Length));
+			}
+
+			pdb.SetSymAttribute((int)function.token, "MD2", buffer.length, buffer.buffer);
 		}
 
 		private void WriteIteratorClass(PdbFunction function)
@@ -1064,12 +1093,6 @@ namespace Pdb.Rewriter
 			this.length = this.buffer.Length;
 		}
 
-		public void Reset(byte[] buffer)
-		{
-			this.buffer = buffer ?? new byte[0];
-			this.length = this.buffer.Length;
-		}
-
 		public void Advance(int length)
 		{
 			if (position + length > buffer.Length)
@@ -1310,13 +1333,6 @@ namespace Pdb.Rewriter
 		{
 			align--;
 			Advance(((position + align) & ~align) - position);
-		}
-
-		public byte[] ToArray()
-		{
-			var bytes = new byte[length];
-			Buffer.BlockCopy(buffer, 0, bytes, 0, length);
-			return bytes;
 		}
 	}
 }

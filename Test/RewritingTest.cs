@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Cci.Pdb;
 using NUnit.Framework;
 
@@ -21,7 +22,7 @@ namespace Pdb.Rewriter.Test
 		public void MethodWithLocals()
 		{
 			PdbFunction original, rewritten;
-			RunTest("Answer", out original, out rewritten);
+			RunTest("Pdb.Rewriter.Test.RewritingTest.Answer", out original, out rewritten);
 			AssertFunction(original, rewritten);
 		}
 
@@ -40,7 +41,17 @@ namespace Pdb.Rewriter.Test
 		public void Iterator()
 		{
 			PdbFunction original, rewritten;
-			RunTest("Evens", out original, out rewritten);
+			RunTest("Pdb.Rewriter.Test.RewritingTest.Evens", out original, out rewritten);
+			AssertFunction(original, rewritten);
+		}
+
+		[Test]
+		public void IteratorScopes()
+		{
+			var iterator = module.GetType(typeof (RewritingTest).FullName).NestedTypes.Single(t => t.Name.Contains("Evens"));
+
+			PdbFunction original, rewritten;
+			RunTest(iterator.FullName + ".MoveNext", out original, out rewritten);
 			AssertFunction(original, rewritten);
 		}
 	}

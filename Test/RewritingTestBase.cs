@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Cci;
 using Microsoft.Cci.Pdb;
 using Mono.Cecil;
 using NUnit.Framework;
@@ -11,7 +13,7 @@ namespace Pdb.Rewriter.Test
 	public abstract class RewritingTestBase
 	{
 		private string tempPath;
-		private ModuleDefinition module;
+		protected ModuleDefinition module;
 
 		internal static void AssertFunction(PdbFunction originalFunction, PdbFunction function)
 		{
@@ -22,11 +24,23 @@ namespace Pdb.Rewriter.Test
 			Assert.AreEqual(originalFunction.slotToken, function.slotToken);
 			AssertSlots(originalFunction.slots, function.slots);
 			Assert.AreEqual(originalFunction.iteratorClass, function.iteratorClass);
+			AssertIteratorScopes(originalFunction.iteratorScopes, function.iteratorScopes);
+		}
+
+		private static void AssertIteratorScopes(List<ILocalScope> originalScopes, List<ILocalScope> scopes)
+		{
+			AssertLists(originalScopes, scopes);
+
+			for (int i = 0; i < (originalScopes ?? new List<ILocalScope>()).Count; i++)
+			{
+				Assert.AreEqual(originalScopes[i].Offset, scopes[i].Offset);
+				Assert.AreEqual(originalScopes[i].Length, scopes[i].Length);
+			}
 		}
 
 		private static void AssertLines(PdbLines[] originalLines, PdbLines[] lines)
 		{
-			AssertArrays(originalLines, lines);
+			AssertLists(originalLines, lines);
 
 			for (int i = 0; i < (originalLines ?? new PdbLines[0]).Length; i++)
 			{
@@ -37,7 +51,7 @@ namespace Pdb.Rewriter.Test
 
 		private static void AssertLines(PdbLine[] originalLines, PdbLine[] lines)
 		{
-			AssertArrays(originalLines, lines);
+			AssertLists(originalLines, lines);
 
 			for (int i = 0; i < originalLines.Length; i++)
 			{
@@ -58,7 +72,7 @@ namespace Pdb.Rewriter.Test
 
 		private static void AssertScopes(PdbScope[] originalScopes, PdbScope[] scopes)
 		{
-			AssertArrays(originalScopes, scopes);
+			AssertLists(originalScopes, scopes);
 
 			for (int i = 0; i < originalScopes.Length; i++)
 			{
@@ -74,7 +88,7 @@ namespace Pdb.Rewriter.Test
 
 		private static void AssertConstants(PdbConstant[] originalConstants, PdbConstant[] constants)
 		{
-			AssertArrays(originalConstants, constants);
+			AssertLists(originalConstants, constants);
 
 			for (int i = 0; i < originalConstants.Length; i++)
 			{
@@ -86,7 +100,7 @@ namespace Pdb.Rewriter.Test
 
 		private static void AssertSlots(PdbSlot[] originalSlots, PdbSlot[] slots)
 		{
-			AssertArrays(originalSlots, slots);
+			AssertLists(originalSlots, slots);
 
 			for (int i = 0; i < originalSlots.Length; i++)
 			{
@@ -95,7 +109,7 @@ namespace Pdb.Rewriter.Test
 			}
 		}
 
-		private static void AssertArrays(Array original, Array array)
+		private static void AssertLists(IList original, IList array)
 		{
 			if (original == null)
 			{
@@ -104,7 +118,7 @@ namespace Pdb.Rewriter.Test
 			}
 
 			Assert.IsNotNull(array);
-			Assert.AreEqual(original.Length, array.Length);
+			Assert.AreEqual(original.Count, array.Count);
 		}
 
 		internal void RunTest(string name, out PdbFunction original, out PdbFunction rewritten, Dictionary<string, string> mapping = null)
@@ -113,7 +127,7 @@ namespace Pdb.Rewriter.Test
 			using (var file = File.OpenRead(Extensions.GetPdbFileName(module)))
 				originalFunctions = PdbFile.LoadFunctions(file, readAllStrings: true);
 
-			var method = module.GetType(typeof (RewritingTest).FullName).Methods.Single(m => m.Name == name);
+			var method = GetMethod(name);
 			original = originalFunctions.Single(f => f.token == method.MetadataToken.ToUInt32());
 
 			Rewrite.MapSymbols(module, mapping ?? new Dictionary<string, string>());
@@ -123,6 +137,12 @@ namespace Pdb.Rewriter.Test
 				rewrittenFunctions = PdbFile.LoadFunctions(file, readAllStrings: true);
 
 			rewritten = rewrittenFunctions.Single(f => f.token == method.MetadataToken.ToUInt32());
+		}
+
+		MethodDefinition GetMethod (string fullName)
+		{
+			var separator = fullName.LastIndexOf('.');
+			return module.GetType(fullName.Substring(0, separator)).Methods.Single(m => m.Name == fullName.Substring(separator + 1));
 		}
 
 		[SetUp]
