@@ -8,8 +8,8 @@
     <ProjectGuid>{482B2205-3193-4D60-8A71-08F18D225C78}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pdb.Rewriter</RootNamespace>
-    <AssemblyName>Pdb.Rewriter</AssemblyName>
+    <RootNamespace>SyntaxTree.Pdb</RootNamespace>
+    <AssemblyName>SyntaxTree.Pdb</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -69,6 +69,12 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>SyntaxTree.oss.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -100,10 +106,30 @@
     <Compile Include="Microsoft.Cci.Pdb\PdbSource.cs" />
     <Compile Include="Microsoft.Cci.Pdb\SourceLocationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rewrite.cs" />
+    <Compile Include="SyntaxTree.Pdb\ByteBuffer.cs" />
+    <Compile Include="SyntaxTree.Pdb\Constant.cs" />
+    <Compile Include="SyntaxTree.Pdb\CorSymWriter.cs" />
+    <Compile Include="SyntaxTree.Pdb\Document.cs" />
+    <Compile Include="SyntaxTree.Pdb\Extensions.cs" />
+    <Compile Include="SyntaxTree.Pdb\Function.cs" />
+    <Compile Include="SyntaxTree.Pdb\IMetaDataEmit.cs" />
+    <Compile Include="SyntaxTree.Pdb\IMetaDataImport.cs" />
+    <Compile Include="SyntaxTree.Pdb\IMetadataProvider.cs" />
+    <Compile Include="SyntaxTree.Pdb\IScope.cs" />
+    <Compile Include="SyntaxTree.Pdb\IScopeMixin.cs" />
+    <Compile Include="SyntaxTree.Pdb\ISymUnmanagedDocumentWriter.cs" />
+    <Compile Include="SyntaxTree.Pdb\ISymUnmanagedWriter2.cs" />
+    <Compile Include="SyntaxTree.Pdb\IteratorScope.cs" />
+    <Compile Include="SyntaxTree.Pdb\Metadata.cs" />
+    <Compile Include="SyntaxTree.Pdb\PdbWriter.cs" />
+    <Compile Include="SyntaxTree.Pdb\ProgramDatabase.cs" />
+    <Compile Include="SyntaxTree.Pdb\Scope.cs" />
+    <Compile Include="SyntaxTree.Pdb\SequencePoint.cs" />
+    <Compile Include="SyntaxTree.Pdb\Variable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Microsoft.Cci.Pdb\LICENSE" />
+    <None Include="SyntaxTree.oss.snk" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cecil\Mono.Cecil.csproj">
@@ -111,6 +137,7 @@
       <Name>Mono.Cecil</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

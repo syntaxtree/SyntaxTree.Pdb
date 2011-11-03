@@ -2,37 +2,19 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-[assembly: AssemblyTitle("Pdb.Rewriter")]
+[assembly: AssemblyTitle("SyntaxTree.Pdb")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Pdb.Rewriter")]
+[assembly: AssemblyProduct("SyntaxTree.Pdb")]
 [assembly: AssemblyCopyright("Copyright © SyntaxTree 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("0565a2c9-20db-4b37-95a8-a80ce51bfbab")]
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: InternalsVisibleTo("Pdb.Rewriter.Test")]
+[assembly: InternalsVisibleTo("SyntaxTree.Pdb.Test, PublicKey=0024000004800000940000000602000000240000525341310004000001000100a14c244a54a343efd583f0ee8fab04ad1455c66c7080f67ed6401813e226ecd4854f93813c093ea77ec7bbb6550caf8a71494377110113e966b27a4bc5e41b92d60cf57c13f38d3df74696e13c719303c77748524080db63589dc8079a11a30e6f1bdaf9073fd90f5a96061e2b1b5ce4254834578470ae3df386083533fe95d2")]

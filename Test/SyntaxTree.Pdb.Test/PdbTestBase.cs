@@ -1,3 +1,28 @@
+//
+// PdbTestBase.cs
+//
+// Copyright (c) 2011 SyntaxTree
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,9 +33,9 @@ using Microsoft.Cci.Pdb;
 using Mono.Cecil;
 using NUnit.Framework;
 
-namespace Pdb.Rewriter.Test
+namespace SyntaxTree.Pdb.Test
 {
-	public abstract class RewritingTestBase
+	public abstract class PdbTestBase
 	{
 		private string tempPath;
 		protected ModuleDefinition module;
@@ -121,19 +146,27 @@ namespace Pdb.Rewriter.Test
 			Assert.AreEqual(original.Count, array.Count);
 		}
 
+		private static string PdbFileNameOf(ModuleDefinition module)
+		{
+			return Path.GetFullPath(Path.ChangeExtension(module.FullyQualifiedName, ".pdb"));
+		}
+
 		internal void RunTest(string name, out PdbFunction original, out PdbFunction rewritten, Dictionary<string, string> mapping = null)
 		{
+			var pdbFileName = PdbFileNameOf(module);
+
 			PdbFunction[] originalFunctions;
-			using (var file = File.OpenRead(Extensions.GetPdbFileName(module)))
+			using (var file = File.OpenRead(pdbFileName))
 				originalFunctions = PdbFile.LoadFunctions(file, readAllStrings: true);
 
 			var method = GetMethod(name);
 			original = originalFunctions.Single(f => f.token == method.MetadataToken.ToUInt32());
 
-			Rewrite.MapSymbols(module, mapping ?? new Dictionary<string, string>());
+			var pdb = ProgramDatabase.Read(pdbFileName);
+			pdb.Write(pdbFileName, new CecilMetadataProvider(module));
 
 			PdbFunction[] rewrittenFunctions;
-			using (var file = File.OpenRead(Extensions.GetPdbFileName(module)))
+			using (var file = File.OpenRead(pdbFileName))
 				rewrittenFunctions = PdbFile.LoadFunctions(file, readAllStrings: true);
 
 			rewritten = rewrittenFunctions.Single(f => f.token == method.MetadataToken.ToUInt32());
@@ -152,7 +185,7 @@ namespace Pdb.Rewriter.Test
 			File.Delete(tempPath);
 			Directory.CreateDirectory(tempPath);
 
-			var moduleFile = new Uri(typeof(RewritingTest).Assembly.CodeBase).LocalPath;
+			var moduleFile = new Uri(typeof(PdbTest).Assembly.CodeBase).LocalPath;
 			var tempModule = Path.Combine(tempPath, Path.GetFileName(moduleFile));
 			File.Copy(moduleFile, tempModule);
 			File.Copy(Path.ChangeExtension(moduleFile, ".pdb"), Path.Combine(tempPath, Path.GetFileNameWithoutExtension(moduleFile) + ".pdb"));

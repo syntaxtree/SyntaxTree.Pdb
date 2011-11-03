@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pdb.Rewriter", "Pdb.Rewriter.csproj", "{482B2205-3193-4D60-8A71-08F18D225C78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntaxTree.Pdb", "SyntaxTree.Pdb.csproj", "{482B2205-3193-4D60-8A71-08F18D225C78}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil", "..\cecil\Mono.Cecil.csproj", "{D68133BD-1E63-496E-9EDE-4FBDBF77B486}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pdb.Rewriter.Test", "Test\Pdb.Rewriter.Test.csproj", "{322DED7D-7570-4646-9C40-9187ED765315}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntaxTree.Pdb.Test", "Test\SyntaxTree.Pdb.Test.csproj", "{322DED7D-7570-4646-9C40-9187ED765315}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
