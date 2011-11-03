@@ -101,7 +101,6 @@ namespace Pdb.Rewriter
 			WriteIteratorScopes(function);
 
 			// TODO
-			// function.iteratorScopes
 			// function.namespaceScopes
 			// function.usedNamespaces
 			// function.usingCounts
@@ -186,6 +185,9 @@ namespace Pdb.Rewriter
 			WriteSlots(scope, function);
 			WriteConstants(scope.constants);
 			WriteScopes(scope.scopes, function);
+			
+			// TODO
+			// scope.usedNamespaces
 
 			pdb.CloseScope((int) (scope.offset + scope.length));
 		}
