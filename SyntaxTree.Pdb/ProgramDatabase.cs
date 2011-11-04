@@ -40,6 +40,16 @@ namespace SyntaxTree.Pdb
 		private readonly Collection<Function> functions;
 
 		/// <summary>
+		/// The age of the pdb.
+		/// </summary>
+		public int Age { get; set; }
+
+		/// <summary>
+		/// The guid of the pdb.
+		/// </summary>
+		public Guid Guid { get; set; }
+
+		/// <summary>
 		/// The functions defined in the pdb file.
 		/// </summary>
 		public Collection<Function> Functions { get { return functions; } }
@@ -49,15 +59,65 @@ namespace SyntaxTree.Pdb
 			this.functions = new Collection<Function>();
 		}
 
-		internal ProgramDatabase(IEnumerable<PdbFunction> pdbFunctions) : this()
+		internal ProgramDatabase(IEnumerable<PdbFunction> pdbFunctions, int age, Guid guid) : this()
 		{
 			this.functions.AddRange(pdbFunctions.Select(f => new Function(f)));
+			this.Age = age;
+			this.Guid = guid;
 		}
 
 		internal void Write(PdbWriter writer)
 		{
 			foreach (var function in functions)
 				function.Write(writer);
+		}
+
+		internal void WriteHeader(string fileName)
+		{
+			using (var file = File.Open(fileName, FileMode.Open, FileAccess.ReadWrite))
+			{
+				if (file.Length < 512)
+					return;
+
+				WriteHeaderAt(HeaderPositionIn(file), file);
+			}
+		}
+
+		private void WriteHeaderAt(long position, FileStream file)
+		{
+			var writer = new BinaryWriter(file);
+			writer.BaseStream.Position = position;
+
+			writer.Write(this.Age);
+			writer.Write(this.Guid.ToByteArray());
+		}
+
+		private static long HeaderPositionIn(Stream stream)
+		{
+			var reader = new BinaryReader(stream);
+			reader.Advance(32);
+
+			var pageSize = reader.ReadInt32();
+			reader.Advance(4);
+
+			var pageCount = reader.ReadInt32();
+			reader.Advance(pageSize - 44);
+
+			const uint magic = 0x1312e94;
+
+			int page = 0;
+			for (int i = 1; i < pageCount; i++)
+			{
+				if (magic == reader.ReadUInt32())
+				{
+					page = i;
+					break;
+				}
+
+				reader.Advance(pageSize - 4);
+			}
+
+			return page * pageSize + 8;
 		}
 
 		/// <summary>
@@ -74,6 +134,8 @@ namespace SyntaxTree.Pdb
 
 			using (var writer = new PdbWriter(fileName, metadataProvider))
 				Write(writer);
+
+			WriteHeader(fileName);
 		}
 
 		/// <summary>
@@ -129,7 +191,9 @@ namespace SyntaxTree.Pdb
 			if (!stream.CanRead)
 				throw new ArgumentException("Can not read from stream", "stream");
 
-			return new ProgramDatabase(PdbFile.LoadFunctions(stream, readAllStrings: true));
+			int age;
+			Guid guid;
+			return new ProgramDatabase(PdbFile.LoadFunctions(stream, true, out age, out guid), age, guid);
 		}
 	}
 }

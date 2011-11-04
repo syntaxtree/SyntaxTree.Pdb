@@ -154,9 +154,11 @@ namespace SyntaxTree.Pdb.Test
 
 		internal void RunTest(string name, out PdbFunction original, out PdbFunction rewritten)
 		{
+			int originalAge;
+			Guid originalGuid;
 			PdbFunction[] originalFunctions;
 			using (var file = File.OpenRead(pdbFileName))
-				originalFunctions = PdbFile.LoadFunctions(file, readAllStrings: true);
+				originalFunctions = PdbFile.LoadFunctions(file, true, out originalAge, out originalGuid);
 
 			var method = GetMethod(name);
 			original = originalFunctions.Single(f => f.token == method.MetadataToken.ToUInt32());
@@ -164,11 +166,16 @@ namespace SyntaxTree.Pdb.Test
 			var pdb = ProgramDatabase.Read(pdbFileName);
 			pdb.Write(pdbFileName, new CecilMetadataProvider(module));
 
+			int rewrittenAge;
+			Guid rewrittenGuid;
 			PdbFunction[] rewrittenFunctions;
 			using (var file = File.OpenRead(pdbFileName))
-				rewrittenFunctions = PdbFile.LoadFunctions(file, readAllStrings: true);
+				rewrittenFunctions = PdbFile.LoadFunctions(file, true, out rewrittenAge, out rewrittenGuid);
 
 			rewritten = rewrittenFunctions.Single(f => f.token == method.MetadataToken.ToUInt32());
+
+			Assert.AreEqual(originalAge, rewrittenAge);
+			Assert.AreEqual(originalGuid, rewrittenGuid);
 		}
 
 		MethodDefinition GetMethod (string fullName)

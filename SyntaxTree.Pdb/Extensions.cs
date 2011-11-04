@@ -25,6 +25,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace SyntaxTree.Pdb
 {
@@ -34,6 +35,11 @@ namespace SyntaxTree.Pdb
 		{
 			foreach (var item in items)
 				self.Add(item);
+		}
+
+		public static void Advance(this BinaryReader self, int bytes)
+		{
+			self.BaseStream.Position += bytes;
 		}
 	}
 }
