@@ -59,6 +59,11 @@ namespace SyntaxTree.Pdb
 		/// </summary>
 		public int EndColumn { get; set; }
 
+		/// <summary>
+		/// Returns whether the sequence point is hidden.
+		/// </summary>
+		public bool IsHidden { get { return Line == 0xfeefee; } }
+
 		public SequencePoint()
 		{
 		}
