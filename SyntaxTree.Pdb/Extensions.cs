@@ -41,5 +41,10 @@ namespace SyntaxTree.Pdb
 		{
 			self.BaseStream.Position += bytes;
 		}
+
+		public static void Advance(this BinaryWriter self, int bytes)
+		{
+			self.BaseStream.Position += bytes;
+		}
 	}
 }

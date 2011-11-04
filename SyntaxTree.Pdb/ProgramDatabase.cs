@@ -88,6 +88,8 @@ namespace SyntaxTree.Pdb
 			var writer = new BinaryWriter(file);
 			writer.BaseStream.Position = position;
 
+			writer.Advance(4); // version
+			writer.Advance(4); // timestamp
 			writer.Write(this.Age);
 			writer.Write(this.Guid.ToByteArray());
 		}
@@ -117,7 +119,7 @@ namespace SyntaxTree.Pdb
 				reader.Advance(pageSize - 4);
 			}
 
-			return page * pageSize + 8;
+			return page * pageSize;
 		}
 
 		/// <summary>
