@@ -1,5 +1,5 @@
-﻿//
-// PdbTest.cs
+//
+// Source.cs
 //
 // Copyright (c) 2011 SyntaxTree
 //
@@ -23,40 +23,40 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
+using System.Collections.ObjectModel;
 using System.Linq;
-using NUnit.Framework;
+using Microsoft.Cci.Pdb;
 
-namespace SyntaxTree.Pdb.Test
+namespace SyntaxTree.Pdb
 {
-	[TestFixture]
-	public class MappingTest : PdbTestBase
+	/// <summary>
+	/// Represents a source file containing the sequence points
+	/// of the function body.
+	/// </summary>
+	public sealed class Source
 	{
-		[Test]
-		public void MapSourceFiles()
+		private readonly Collection<SequencePoint> sequencePoints;
+
+		/// <summary>
+		/// The document containing the function body.
+		/// </summary>
+		public Document Document { get; set; }
+
+		/// <summary>
+		/// The sequence points of the function body in this source file.
+		/// </summary>
+		public Collection<SequencePoint> SequencePoints { get { return sequencePoints; } }
+
+		public Source()
 		{
-			var pdb = ProgramDatabase.Read(pdbFileName);
+			this.sequencePoints = new Collection<SequencePoint>();
+		}
 
-			var mappingFiles = new Dictionary<string, string>
-			{
-				{"MappingTest.cs", "NewMappingTest.cs"},
-			};
+		internal Source(PdbLines lines) : this()
+		{
+			this.Document = new Document(lines.file);
 
-			var documents = pdb.Functions.SelectMany(f => f.Sources).Select(s => s.Document);
-			foreach (var document in documents)
-			{
-				string mappedFile;
-				if (mappingFiles.TryGetValue(Path.GetFileName(document.Name), out mappedFile))
-					document.Name = Path.Combine(Path.GetDirectoryName(document.Name), mappedFile);
-			}
-
-			pdb.Write(pdbFileName, new CecilMetadataProvider(module));
-
-			pdb = ProgramDatabase.Read(pdbFileName);
-			documents = pdb.Functions.SelectMany(f => f.Sources).Select(s => s.Document).ToList();
-
-			Assert.IsFalse(documents.Any(d => Path.GetFileName(d.Name) == "MappingTest.cs"));
+			sequencePoints.AddRange(lines.lines.Select(l => new SequencePoint(l)));
 		}
 	}
 }

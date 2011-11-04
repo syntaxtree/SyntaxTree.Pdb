@@ -38,7 +38,7 @@ namespace SyntaxTree.Pdb
 		private readonly Collection<Constant> constants;
 		private readonly Collection<Scope> scopes;
 		private readonly Collection<IteratorScope> iteratorScopes;
-		private readonly Collection<SequencePoint> sequencePoints;
+		private readonly Collection<Source> sources;
 
 		/// <summary>
 		/// The metadata token of the function
@@ -78,9 +78,9 @@ namespace SyntaxTree.Pdb
 		public Collection<Constant> Constants { get { return constants; } }
 
 		/// <summary>
-		/// The sequence points of the function.
+		/// The sources where are defined the function.
 		/// </summary>
-		public Collection<SequencePoint> SequencePoints { get { return sequencePoints; } } 
+		public Collection<Source> Sources { get { return sources; } } 
 
 		public Function()
 		{
@@ -88,7 +88,7 @@ namespace SyntaxTree.Pdb
 			this.constants = new Collection<Constant>();
 			this.scopes = new Collection<Scope>();
 			this.iteratorScopes = new Collection<IteratorScope>();
-			this.sequencePoints = new Collection<SequencePoint>();
+			this.sources = new Collection<Source>();
 		}
 
 		internal Function(PdbFunction function) : this()
@@ -98,24 +98,17 @@ namespace SyntaxTree.Pdb
 			this.IteratorTypeName = function.iteratorClass ?? string.Empty;
 
 			ReadIteratorScopes(function);
-			ReadSequencePoints(function);
+			ReadSources(function);
 
 			this.ReadScope(function.slots, function.constants, function.scopes);
 		}
 
-		private void ReadSequencePoints(PdbFunction function)
+		private void ReadSources(PdbFunction function)
 		{
 			if (function.lines == null)
 				return;
 
-			foreach (var document in function.lines)
-				ReadDocument(document);
-		}
-
-		private void ReadDocument(PdbLines pdbDoc)
-		{
-			var document = new Document(pdbDoc.file);
-			sequencePoints.AddRange(pdbDoc.lines.Select(l => new SequencePoint(document, l)));
+			sources.AddRange(function.lines.Select(l => new Source(l)));
 		}
 
 		private void ReadIteratorScopes(PdbFunction function)

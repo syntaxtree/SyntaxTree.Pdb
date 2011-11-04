@@ -51,7 +51,7 @@ namespace SyntaxTree.Pdb
 		{
 			pdb.OpenMethod(function.Token);
 
-			WriteSequencePoints(function.SequencePoints);
+			WriteSources(function.Sources);
 			WriteScopes(function.Scopes, function);
 			WriteConstants(function.Constants);
 			WriteVariables(function.Variables, function.VariablesToken, 0, 0);
@@ -162,34 +162,37 @@ namespace SyntaxTree.Pdb
 			pdb.DefineLocalVariable2(variable.Name, 0, slotToken, (int) SymAddressKind.ILOffset, variable.Index, 0, 0, scopeOffset, scopeOffset + scopeLength);
 		}
 
-		private void WriteSequencePoints(IList<SequencePoint> sequencePoints)
+		private void WriteSources(IList<Source> sources)
 		{
-			if (sequencePoints.Count == 0)
+			if (sources.Count == 0)
 				return;
 
-			var documents = sequencePoints.GroupBy(sp => sp.Document).Select(g => new { Document = UnmanagedDocumentFor(g.Key), SequencePoints = g.ToArray() });
-			foreach (var document in documents)
+			foreach (var source in sources)
+				WriteSource(source);
+		}
+
+		private void WriteSource(Source source)
+		{
+			var sequencePoints = source.SequencePoints;
+			var count = sequencePoints.Count;
+
+			var offsets = new int[count];
+			var lines = new int[count];
+			var columns = new int[count];
+			var endLines = new int[count];
+			var endColumns = new int[count];
+
+			for (int i = 0; i < sequencePoints.Count; i++)
 			{
-				var count = document.SequencePoints.Length;
-
-				var offsets = new int[count];
-				var lines = new int[count];
-				var columns = new int[count];
-				var endLines = new int[count];
-				var endColumns = new int[count];
-
-				for (int i = 0; i < document.SequencePoints.Length; i++)
-				{
-					var sequencePoint = document.SequencePoints[i];
-					offsets[i] = sequencePoint.Offset;
-					lines[i] = sequencePoint.Line;
-					columns[i] = sequencePoint.Column;
-					endLines[i] = sequencePoint.EndLine;
-					endColumns[i] = sequencePoint.EndColumn;
-				}
-
-				pdb.DefineSequencePoints(document.Document, count, offsets, lines, columns, endLines, endColumns);
+				var sequencePoint = sequencePoints[i];
+				offsets[i] = sequencePoint.Offset;
+				lines[i] = sequencePoint.Line;
+				columns[i] = sequencePoint.Column;
+				endLines[i] = sequencePoint.EndLine;
+				endColumns[i] = sequencePoint.EndColumn;
 			}
+
+			pdb.DefineSequencePoints(UnmanagedDocumentFor(source.Document), count, offsets, lines, columns, endLines, endColumns);
 		}
 
 		private ISymUnmanagedDocumentWriter UnmanagedDocumentFor(Document document)

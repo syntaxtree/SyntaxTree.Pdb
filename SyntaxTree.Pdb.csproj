@@ -125,6 +125,7 @@
     <Compile Include="SyntaxTree.Pdb\ProgramDatabase.cs" />
     <Compile Include="SyntaxTree.Pdb\Scope.cs" />
     <Compile Include="SyntaxTree.Pdb\SequencePoint.cs" />
+    <Compile Include="SyntaxTree.Pdb\Source.cs" />
     <Compile Include="SyntaxTree.Pdb\Variable.cs" />
   </ItemGroup>
   <ItemGroup>

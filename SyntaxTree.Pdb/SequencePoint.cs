@@ -35,11 +35,6 @@ namespace SyntaxTree.Pdb
 	public sealed class SequencePoint : IEquatable<SequencePoint>
 	{
 		/// <summary>
-		/// The document in which the sequence point is defined.
-		/// </summary>
-		public Document Document { get; set; }
-
-		/// <summary>
 		/// The IL offset of the sequence point.
 		/// </summary>
 		public int Offset { get; set; }
@@ -64,12 +59,11 @@ namespace SyntaxTree.Pdb
 		/// </summary>
 		public int EndColumn { get; set; }
 
-		public SequencePoint(Document document)
+		public SequencePoint()
 		{
-			this.Document = document;
 		}
 
-		internal SequencePoint(Document document, PdbLine line) : this(document)
+		internal SequencePoint(PdbLine line) : this()
 		{
 			this.Offset = (int) line.offset;
 			this.Line = (int) line.lineBegin;
@@ -80,8 +74,7 @@ namespace SyntaxTree.Pdb
 
 		public override int GetHashCode()
 		{
-			return this.Document.GetHashCode() ^ this.Offset
-				^ this.Line ^ this.Column ^ this.EndLine ^ this.EndColumn;
+			return this.Offset ^ this.Line ^ this.Column ^ this.EndLine ^ this.EndColumn;
 		}
 
 		public bool Equals(SequencePoint other)
@@ -89,8 +82,7 @@ namespace SyntaxTree.Pdb
 			if (other == null)
 				return false;
 
-			return this.Document.Equals(other.Document)
-				&& this.Offset == other.Offset
+			return this.Offset == other.Offset
 				&& this.Line == other.Line
 				&& this.Column == other.Column
 				&& this.EndLine == other.EndLine
