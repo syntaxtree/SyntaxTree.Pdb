@@ -42,10 +42,7 @@ namespace SyntaxTree.Pdb
 			if (ptr == IntPtr.Zero)
 				return;
 
-			if (IntPtr.Size == 8)
-				Marshal.WriteInt64(ptr, value);
-			else
-				Marshal.WriteInt32(ptr, value);
+			Marshal.WriteInt32(ptr, value);
 		}
 
 		private static void WriteString(string str, IntPtr buffer, int bufferSize, IntPtr chars)
