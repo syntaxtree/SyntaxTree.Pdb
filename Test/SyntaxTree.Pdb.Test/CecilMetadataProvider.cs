@@ -78,5 +78,15 @@ namespace SyntaxTree.Pdb.Test
 			rva = method.RVA;
 			return true;
 		}
+
+		public bool GetEntryPoint(out int entryPointToken)
+		{
+			entryPointToken = 0;
+			if (module.EntryPoint == null)
+				return false;
+
+			entryPointToken = module.EntryPoint.MetadataToken.ToInt32();
+			return true;
+		}
 	}
 }

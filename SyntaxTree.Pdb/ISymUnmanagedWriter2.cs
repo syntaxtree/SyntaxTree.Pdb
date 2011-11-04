@@ -35,7 +35,7 @@ namespace SyntaxTree.Pdb
 	interface ISymUnmanagedWriter2
 	{
 		ISymUnmanagedDocumentWriter DefineDocument(string url, ref Guid language, ref Guid languageVendor, ref Guid documentType);
-		void __SetUserEntryPoint();
+		void SetUserEntryPoint(int entryPointToken);
 		void OpenMethod(int method);
 		void CloseMethod();
 		int OpenScope(int startOffset);

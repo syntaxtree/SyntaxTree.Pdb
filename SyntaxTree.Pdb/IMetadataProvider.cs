@@ -58,5 +58,12 @@ namespace SyntaxTree.Pdb
 		/// <param name="rva">The RVA of the method body.</param>
 		/// <returns>Whether retrieving the metadata for the method succeeded.</returns>
 		bool GetMethodMetadata(int token, out string name, out int attributes, out int implAttributes, out int rva);
+
+		/// <summary>
+		/// Get the metadata token of the entry point.
+		/// </summary>
+		/// <param name="entryPointToken">The metadata token of the entry point.</param>
+		/// <returns>Whether retrieving an entry point succeeeded.</returns>
+		bool GetEntryPoint(out int entryPointToken);
 	}
 }

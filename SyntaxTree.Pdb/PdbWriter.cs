@@ -34,16 +34,16 @@ namespace SyntaxTree.Pdb
 	class PdbWriter : IDisposable
 	{
 		private ISymUnmanagedWriter2 pdb;
-		private readonly Metadata metadata;
+		private readonly IMetadataProvider metadataProvider;
 		private IDictionary<string, ISymUnmanagedDocumentWriter> documentWriters;
 
 		public PdbWriter(string fileName, IMetadataProvider metadataProvider)
 		{
 			this.pdb = new ISymUnmanagedWriter2();
-			this.metadata = new Metadata(metadataProvider);
+			this.metadataProvider = metadataProvider;
 			this.documentWriters = new Dictionary<string, ISymUnmanagedDocumentWriter>();
 
-			this.pdb.Initialize(this.metadata, fileName, pIStream: null, fFullBuild: true);
+			this.pdb.Initialize(new Metadata(metadataProvider), fileName, pIStream: null, fFullBuild: true);
 		}
 
 		public void Write(Function function)
@@ -206,8 +206,18 @@ namespace SyntaxTree.Pdb
 			return documentWriter;
 		}
 
+		private void WriteEntryPoint()
+		{
+			int entryPointToken = 0;
+			if (!metadataProvider.GetEntryPoint(out entryPointToken))
+				return;
+
+			this.pdb.SetUserEntryPoint(entryPointToken);
+		}
+
 		public void Dispose()
 		{
+			WriteEntryPoint();
 			this.pdb.Close();
 			Marshal.ReleaseComObject(this.pdb);
 
