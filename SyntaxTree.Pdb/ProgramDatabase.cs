@@ -141,31 +141,6 @@ namespace SyntaxTree.Pdb
 		}
 
 		/// <summary>
-		/// Write the pdb to a stream.
-		/// </summary>
-		/// <param name="stream">The stream to write the pdb into.</param>
-		/// <param name="metadataProvider">The metadata provider for the managed metadata.</param>
-		public void Write(Stream stream, IMetadataProvider metadataProvider)
-		{
-			if (stream == null)
-				throw new ArgumentNullException("stream");
-			if (metadataProvider == null)
-				throw new ArgumentNullException("metadataProvider");
-
-			var tempPath = Path.GetTempFileName();
-			try
-			{
-				Write(tempPath, metadataProvider);
-				using (var file = File.OpenRead(tempPath))
-					file.CopyTo(stream);
-			}
-			finally
-			{
-				File.Delete(tempPath);
-			}
-		}
-
-		/// <summary>
 		/// Read a pdb from a file.
 		/// </summary>
 		/// <param name="fileName">The file name of the pdb.</param>
